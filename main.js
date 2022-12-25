@@ -1,4 +1,4 @@
-var Auth = ''
+var Auth = sessionStorage.getItem("Auth");
 
 async function query(body) {
     const resp = await fetch("https://api.github.com/graphql", {
@@ -172,10 +172,14 @@ function displayLanguages(langs) {
 
 const params = new URLSearchParams(document.location.search)
 
+function updateAuth(){
+    Auth = document.getElementById("auth").value.trim()
+    sessionStorage.setItem("Auth", Auth);
+}
+
 function reload(){
     document.getElementById("from-repo").innerText = "loading..."
-    Auth = document.getElementById("auth").value.trim()
-    if (Auth == ""){
+    if (Auth === "" || Auth === null){
         document.getElementById("from-repo").innerHTML = `
             This app is self hosted in your browser.
             To access the GitHub GraphQL API,
