@@ -181,7 +181,7 @@ function reload(){
             To access the GitHub GraphQL API,
             you need to provied it with a 
             <a target="_blank" href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token#creating-a-personal-access-token-classic">
-                Personal access token (classic)"</a>.
+                Personal access token (classic)</a>.
             We are only interisted in public data, so for available scopes, none is needed.
         `
         return
