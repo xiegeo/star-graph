@@ -1,14 +1,46 @@
 var Auth = ''
 
-async function getRepo(owner, name, select) {
-    const response = await fetch("https://api.github.com/graphql", {
+async function query(body) {
+    const resp = await fetch("https://api.github.com/graphql", {
         method: 'POST',
         headers: {
             'Authorization': Auth,
         },
-        body: JSON.stringify({ "query": `{repository(owner: ${JSON.stringify(owner)}, name: ${JSON.stringify(name)})${select}}` })
+        body: JSON.stringify({ "query": body })
     })
-    return await response.json()
+    return await resp.json()
+}
+
+async function getRepo(owner, name, select) {
+    if (owner === null) {
+        const resp = await query(`{viewer{
+            pinnedItems(first:6, types:REPOSITORY){
+              nodes{ ... on Repository{
+                owner{login}
+                name
+            }}}}}`)
+        if (resp.data == null) {
+            throw JSON.stringify(data)
+        }
+        var content = ""
+        if (resp.data.viewer.pinnedItems.nodes.length === 0) {
+            content += `You don't have any repos pinned to your account. But`
+        }else{
+            content += `Start from your pins:<ul>${displayPinList(resp.data.viewer.pinnedItems.nodes)}</ul> Or,`
+        }
+         document.getElementById("from-repo").innerHTML = content +
+            ` you can start with one of these:
+            <ul>
+                <li> <a href="?owner=git&name=git">git/git</a>
+                <li> <a href="?owner=github&name=opensource.guide">github/opensource.guide</a>
+                <li> <a href="?owner=golang&name=go">golang/go</a>
+                <li> <a href="?owner=mdn&name=content">mdn/content</a>
+                <li> <a href="?owner=graphql&name=graphql-spec">graphql/graphql-spec</a>
+                <li> <a href="?owner=xiegeo&name=star-graph">xiegeo/star-graph</a>
+            </ul>`
+        throw "" // this is ok
+    }
+    return await query(`{repository(owner: ${JSON.stringify(owner)}, name: ${JSON.stringify(name)})${select}}`)
 }
 
 const selectRepoLink = "owner{login},name,url"
@@ -25,6 +57,15 @@ function displayUserLink(owner) {
 
 function displayRepoLink(repo) {
     return `${displayUserLink(repo.owner)}/<a target="_blank" href="${repo.url}">${repo.name}</a>`
+}
+
+function displayPinList(pinNodes) {
+    var out = ""
+    pinNodes.forEach(pin => {
+        out += `<li> <a href="?owner=${pin.owner.login}&name=${pin.name}">${pin.owner.login}/${pin.name}</a>`
+    });
+    console.log(pinNodes)
+    return out
 }
 
 function displayRepo(repo) {
@@ -131,13 +172,6 @@ function displayLanguages(langs) {
 
 const params = new URLSearchParams(document.location.search)
 
-let fromOwner = params.get("owner")
-let fromName = params.get("name")
-if (fromOwner === null) {
-    fromOwner = "xiegeo"
-    fromName = "modbusone"
-}
-
 function reload(){
     document.getElementById("from-repo").innerText = "loading..."
     Auth = document.getElementById("auth").value.trim()
@@ -147,12 +181,16 @@ function reload(){
             To access the GitHub GraphQL API,
             you need to provied it with a 
             <a target="_blank" href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token#creating-a-personal-access-token-classic">
-                Personal access token (classic)"</a>.
+                Personal access token (classic)</a>.
             We are only interisted in public data, so for available scopes, none is needed.
         `
         return
     }
     if (!Auth.startsWith("Bearer ")) {Auth = "Bearer " + Auth}
+
+    let fromOwner = params.get("owner")
+    let fromName = params.get("name")
+
     getRepo(fromOwner, fromName, `{${selectRepo},${selectStarGazers()}}`)
     .then((data)=>{
         console.log('Got resp:', data)
@@ -167,6 +205,10 @@ function reload(){
         document.getElementById("from-repo").innerHTML = displayRepo(data.repository)
         document.getElementById("list-stars").innerHTML = displayStarGazers(data.repository.stargazers, data.repository)
     }).catch((err) => {
+        if (err === ""){
+            console.log('noop');
+            return
+        }
         console.log('Fail:', err);
         document.getElementById("from-repo").innerText = err
     })
