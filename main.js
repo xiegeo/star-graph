@@ -6,19 +6,25 @@ async function query(body) {
         headers: {
             'Authorization': Auth,
         },
-        body: JSON.stringify({ "query": body })
+        body: JSON.stringify({ "query": `{${body},${selectRateLimit}}` })
     })
-    return await resp.json()
+    const jsonResp = await resp.json()
+    if (jsonResp.data?.rateLimit !== null) {
+        document.getElementById("rate-limit").innerHTML = displayRateLimit(jsonResp.data?.rateLimit)
+    }else{
+        document.getElementById("rate-limit").innerHTML = ""
+    }
+    return jsonResp
 }
 
 async function getRepo(owner, name, select) {
     if (owner === null) {
-        const resp = await query(`{viewer{
+        const resp = await query(`viewer{
             pinnedItems(first:6, types:REPOSITORY){
               nodes{ ... on Repository{
                 owner{login}
                 name
-            }}}}}`)
+            }}}}`)
         if (resp.data == null) {
             throw JSON.stringify(data)
         }
@@ -40,7 +46,7 @@ async function getRepo(owner, name, select) {
             </ul>`
         throw "" // this is ok
     }
-    return await query(`{repository(owner: ${JSON.stringify(owner)}, name: ${JSON.stringify(name)})${select}}`)
+    return await query(`repository(owner: ${JSON.stringify(owner)}, name: ${JSON.stringify(name)})${select}`)
 }
 
 const selectRepoLink = "owner{login},name,url"
@@ -49,6 +55,8 @@ const selectRepo = `${selectRepoLink},descriptionHTML,stargazerCount,forkCount,
     diskUsage,createdAt,updatedAt,pushedAt,
     isFork,parent{${selectRepoLink}},
     languages(first:50){totalSize,edges{size,node{name,color}}}`
+
+const selectRateLimit = `rateLimit{limit,cost,remaining,resetAt}`
 
 
 function displayUserLink(owner) {
@@ -168,6 +176,11 @@ function displayLanguages(langs) {
         out += `<span style="color:${e.node.color}">${e.node.name}</span>&nbsp;${Math.ceil(e.size/1000)/1000}MB `
     });
     return out
+}
+
+function displayRateLimit(rateLimit){
+    return `limit=${rateLimit.limit} cost=${rateLimit.cost} remaining=${rateLimit.remaining}
+            resetAt=${new Date(rateLimit.resetAt).toLocaleTimeString()}`
 }
 
 const params = new URLSearchParams(document.location.search)
