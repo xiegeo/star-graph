@@ -4,9 +4,9 @@ Discover what projects people who stared a repo is involved with.
 
 ## Entry points
 
-To start from your pins: <https://xiegeo.github.io/star-graph/index.html>
+To start from your pins: <https://xiegeo.github.io/star-graph/>
 
-To start from any repo, replace the owner and name in the url <https://xiegeo.github.io/star-graph/index.html?owner=xiegeo&name=star-graph>
+To start from any repo, replace the owner and name in the url <https://xiegeo.github.io/star-graph/?owner=xiegeo&name=star-graph>
 
 ## Screen Shot
 
