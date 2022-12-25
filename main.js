@@ -6,7 +6,7 @@ async function getRepo(owner, name, select) {
         headers: {
             'Authorization': Auth,
         },
-        body: JSON.stringify({ "query": `{repository(owner: \"${owner}\", name: \"${name}\")${select}}` })
+        body: JSON.stringify({ "query": `{repository(owner: ${JSON.stringify(owner)}, name: ${JSON.stringify(name)})${select}}` })
     })
     return await response.json()
 }
@@ -56,7 +56,7 @@ function displayRepos(repos, from) {
         out += `
             <div style="border: 1px solid black;">
                 ${displayRepo(repo)}
-                <a href="home.html?owner=${repo.owner.login}&name=${repo.name}"><button>walk from here</button></>
+                <a href="?owner=${repo.owner.login}&name=${repo.name}"><button>walk from here</button></>
             </div>`
     });
     return out
