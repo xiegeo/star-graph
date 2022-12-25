@@ -1,6 +1,6 @@
 # star-graph
 
-Discover what projects people who stared a repo is involved with.
+Discover what projects people who stared a repo are involved with.
 
 ## Entry points
 
