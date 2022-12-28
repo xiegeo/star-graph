@@ -1,20 +1,27 @@
 <!DOCTYPE html>
 <head>
+    <title>Start Graph</title>
+    <style>
+        :root {
+            color-scheme: light dark;
+        }
+    </style>
     <script src="main.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.3/gh-fork-ribbon.min.css" />
 </head>
+<header>
+    <label>auth token: <input id="auth" type="password"></label>
+    <button type="button" onclick="updateAuth();reload()">Use</button>
+    <span id="rate-limit"></span>
+</header>
 
-<label>auth token</label>
-<input id="auth" type="password">
-<button type="button" onclick="updateAuth();reload()">Use</button>
-<span id="rate-limit"></span>
-
-<div id="from-repo" style="border: 1px solid black;margin-right: 7em;">
-    loading..
-</div>
-
-<div id="list-stars">
-</div>
+<main>
+    <section id="from-repo" style="border: 1px solid black;margin-right: 7em;">
+        loading..
+    </section>
+    <section id="list-stars">
+    </section>
+</main>
 
 <a class="github-fork-ribbon" target="_blank" href="https://github.com/xiegeo/star-graph" data-ribbon="Fork me on GitHub" title="Fork me on GitHub">Fork me on GitHub</a> 
 
