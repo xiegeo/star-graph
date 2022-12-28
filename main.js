@@ -79,12 +79,12 @@ function displayPinList(pinNodes) {
 function displayRepo(repo) {
     return `
         ${displayRepoLink(repo)}
-        stars:${repo.stargazerCount} forks:${repo.forkCount}  
-        <span style="display:inline-block">disk&nbsp;usage:${repo.diskUsage/1000}MB</span>
-        languages: ${displayLanguages(repo.languages)}
+        <span>stars:${repo.stargazerCount} forks:${repo.forkCount}</span>
         ${displayForkedFrom(repo)}
         ${displayDescription(repo)} 
-        <p>
+        <p style="color:grayText">disk&nbsp;usage:${repo.diskUsage/1000}MB
+        languages: ${displayLanguages(repo.languages)}
+        <p style="color:grayText">
         created:${repo.createdAt.substring(0,10)}
         last updated:${repo.updatedAt.substring(0,10)}
         last pushed:${repo.pushedAt.substring(0,10)}
@@ -103,10 +103,10 @@ function displayRepos(repos, from) {
             return
         }
         out += `
-            <div style="border: 1px solid black;">
                 ${displayRepo(repo)}
-                <a href="?owner=${repo.owner.login}&name=${repo.name}"><button>walk from here</button></>
-            </div>`
+                <a href="?owner=${repo.owner.login}&name=${repo.name}"><button>walk from here</button></a>
+                <hr>
+            `
     });
     return out
 }
@@ -143,18 +143,16 @@ function displayStarGazer(edge, from) {
     if (edge.node.repositoriesContributedTo.nodes.length == 0){
         return "" // hide star gazers without contributions
     }
-    return `<div>
+    return `<section><h2 style="color:grayText">
     ${displayUserLink(edge.node)} stared this repo on ${edge.starredAt.substring(0,10)}
-     and recently contribued to ${edge.node.repositoriesContributedTo.totalCount} repos.
-    <div>
+     and recently contribued to ${edge.node.repositoriesContributedTo.totalCount} repos.</h2>
         ${displayRepos(edge.node.repositoriesContributedTo.nodes, from)}
-    </div>
-    </div>`
+    </section>`
 }
 
 function displayForkedFrom(repo) {
     if (!repo.isFork) {return ""}
-    return `<div>forked from ${displayRepoLink(repo.parent)}</div>`
+    return `<p>forked from ${displayRepoLink(repo.parent)}`
 }
 
 function displayDescription(repo) {
@@ -173,14 +171,15 @@ function displayLanguages(langs) {
     }
     var out = ""
     langs.edges.forEach(e => {
-        out += `<span style="color:${e.node.color}">${e.node.name}</span>&nbsp;${Math.ceil(e.size/1000)/1000}MB `
+        out += `<span style="color:${e.node.color}">${e.node.name}</span>&nbsp;`+
+            `${Math.ceil(e.size/1000)/1000}MB `
     });
     return out
 }
 
 function displayRateLimit(rateLimit){
-    return `limit=${rateLimit.limit} cost=${rateLimit.cost} remaining=${rateLimit.remaining}
-            resetAt=${new Date(rateLimit.resetAt).toLocaleTimeString()}`
+    return `<span style="color:grayText">limit=${rateLimit.limit} cost=${rateLimit.cost} remaining=${rateLimit.remaining}
+            resetAt=${new Date(rateLimit.resetAt).toLocaleTimeString()}</span>`
 }
 
 const params = new URLSearchParams(document.location.search)
@@ -223,7 +222,7 @@ function reload(){
         document.getElementById("list-stars").innerHTML = displayStarGazers(data.repository.stargazers, data.repository)
     }).catch((err) => {
         if (err === ""){
-            console.log('noop');
+            console.log('no-op');
             return
         }
         console.log('Fail:', err);
