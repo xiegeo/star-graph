@@ -82,9 +82,9 @@ function displayRepo(repo) {
         <span>stars:${repo.stargazerCount} forks:${repo.forkCount}</span>
         ${displayForkedFrom(repo)}
         ${displayDescription(repo)} 
-        <p style="color:grayText">disk&nbsp;usage:${repo.diskUsage/1000}MB
+        <p style="color:${secondText()}">disk&nbsp;usage:${repo.diskUsage/1000}MB
         languages: ${displayLanguages(repo.languages)}
-        <p style="color:grayText">
+        <p style="color:${secondText()}">
         created:${repo.createdAt.substring(0,10)}
         last updated:${repo.updatedAt.substring(0,10)}
         last pushed:${repo.pushedAt.substring(0,10)}
@@ -97,7 +97,7 @@ function displayRepos(repos, from) {
         if (repo.url === from.url) {
             // hide from repo. see test case ?owner=xmake-io&name=xmake ?owner=freddier&name=hyperblog
             out += `
-            <div style="border: 1px solid black;color:gray">
+            <div style="border: 1px solid black;">
                 ${displayRepoLink(repo)}
             </div>`
             return
@@ -143,7 +143,7 @@ function displayStarGazer(edge, from) {
     if (edge.node.repositoriesContributedTo.nodes.length == 0){
         return "" // hide star gazers without contributions
     }
-    return `<section><h2 style="color:grayText">
+    return `<section><h2 style="color:${secondText()}">
     ${displayUserLink(edge.node)} stared this repo on ${edge.starredAt.substring(0,10)}
      and recently contribued to ${edge.node.repositoriesContributedTo.totalCount} repos.</h2>
         ${displayRepos(edge.node.repositoriesContributedTo.nodes, from)}
@@ -171,14 +171,14 @@ function displayLanguages(langs) {
     }
     var out = ""
     langs.edges.forEach(e => {
-        out += `<span style="color:${e.node.color}">${e.node.name}</span>&nbsp;`+
+        out += `<span class="lang-name" data-color="${e.node.color}">${e.node.name}</span>&nbsp;`+
             `${Math.ceil(e.size/1000)/1000}MB `
     });
     return out
 }
 
 function displayRateLimit(rateLimit){
-    return `<span style="color:grayText">limit=${rateLimit.limit} cost=${rateLimit.cost} remaining=${rateLimit.remaining}
+    return `<span style="color:${secondText()}">limit=${rateLimit.limit} cost=${rateLimit.cost} remaining=${rateLimit.remaining}
             resetAt=${new Date(rateLimit.resetAt).toLocaleTimeString()}</span>`
 }
 
@@ -220,6 +220,7 @@ function reload(){
     
         document.getElementById("from-repo").innerHTML = displayRepo(data.repository)
         document.getElementById("list-stars").innerHTML = displayStarGazers(data.repository.stargazers, data.repository)
+        updateLangName()
     }).catch((err) => {
         if (err === ""){
             console.log('no-op');
@@ -230,4 +231,37 @@ function reload(){
     })
 }
 
+var _secondTextColor = null
+/**
+ * secondText returns a color between canvas text and gray text
+ */
+function secondText() {
+    //return "gray"
+    if (_secondTextColor != null) {return _secondTextColor}
+    _secondTextColor = Color.mix(
+        window.getComputedStyle(document.getElementsByTagName("main")[0]).color,
+        window.getComputedStyle(document.getElementById("grayText")).color,
+        .7).to("srgb").toString()
+    return _secondTextColor
+}
 
+/**
+ * updateLangName uses data-color to decorate language names.
+ * 
+ * Uses the parent element's light component to convert data-color to display style color.
+ */
+function updateLangName() {
+    Array.from(document.getElementsByClassName("lang-name")).forEach(e => {
+        // console.log(e, e.dataset.color)
+        if (e.dataset.color == "null") {
+            console.log(e.textContent, `is missing data-color`)
+            return
+        }
+        const parentColor = new Color(window.getComputedStyle(e.parentElement).color)
+        const dataColor = new Color(e.dataset.color)
+        var useColor = new Color(dataColor)
+        useColor.oklab.l = parentColor.oklab.l
+        e.style.color = useColor.toString()
+        // console.log(e.textContent, parentColor, dataColor, useColor)
+    });
+}
