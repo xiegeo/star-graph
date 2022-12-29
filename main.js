@@ -254,6 +254,7 @@ function updateLangName() {
     Array.from(document.getElementsByClassName("lang-name")).forEach(e => {
         // console.log(e, e.dataset.color)
         if (e.dataset.color == "null") {
+            // test cases ?owner=torvalds&name=linux ?owner=dail8859&name=NotepadNext
             console.log(e.textContent, `is missing data-color`)
             return
         }
