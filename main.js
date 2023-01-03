@@ -9,7 +9,7 @@ async function query(body) {
         body: JSON.stringify({ "query": `{${body},${selectRateLimit}}` })
     })
     const jsonResp = await resp.json()
-    if (jsonResp.data?.rateLimit !== null) {
+    if (jsonResp.data?.rateLimit !== undefined) {
         document.getElementById("rate-limit").innerHTML = displayRateLimit(jsonResp.data?.rateLimit)
     }else{
         document.getElementById("rate-limit").innerHTML = ""
@@ -26,7 +26,7 @@ async function getRepo(owner, name, select) {
                 name
             }}}}`)
         if (resp.data == null) {
-            throw JSON.stringify(data)
+            throw JSON.stringify(resp)
         }
         var content = ""
         if (resp.data.viewer.pinnedItems.nodes.length === 0) {
