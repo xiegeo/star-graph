@@ -262,7 +262,7 @@ function updateLangName() {
         const dataColor = new Color(e.dataset.color)
         var useColor = new Color(dataColor)
         useColor.oklab.l = parentColor.oklab.l
-        e.style.color = useColor.toString()
+        e.style.color = useColor.display()
         // console.log(e.textContent, parentColor, dataColor, useColor)
     });
 }
